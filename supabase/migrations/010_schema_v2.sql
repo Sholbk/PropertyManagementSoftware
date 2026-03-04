@@ -33,12 +33,8 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- ============================================================================
--- HELPER: extract org + role from JWT (used by all RLS policies)
+-- HELPER: auth_org_id (no table dependency — safe to create early)
 -- ============================================================================
-
--- Returns the active organization_id from JWT custom claims.
--- The frontend sets this via Supabase auth.updateUser({ data: { active_org_id } })
--- or it's read from the membership context.
 CREATE OR REPLACE FUNCTION auth_org_id() RETURNS UUID AS $$
     SELECT COALESCE(
         (auth.jwt() -> 'app_metadata' ->> 'active_org_id')::uuid,
@@ -46,25 +42,8 @@ CREATE OR REPLACE FUNCTION auth_org_id() RETURNS UUID AS $$
     );
 $$ LANGUAGE sql STABLE SECURITY DEFINER;
 
--- Returns the user's role within the active org (looked up from memberships)
-CREATE OR REPLACE FUNCTION auth_org_role() RETURNS TEXT AS $$
-    SELECT role FROM public.memberships
-    WHERE user_id = auth.uid()
-      AND organization_id = auth_org_id()
-      AND status = 'active'
-    LIMIT 1;
-$$ LANGUAGE sql STABLE SECURITY DEFINER;
-
--- Convenience: check if current user has one of the given roles in active org
-CREATE OR REPLACE FUNCTION auth_has_role(allowed_roles TEXT[]) RETURNS BOOLEAN AS $$
-    SELECT EXISTS (
-        SELECT 1 FROM public.memberships
-        WHERE user_id = auth.uid()
-          AND organization_id = auth_org_id()
-          AND status = 'active'
-          AND role = ANY(allowed_roles)
-    );
-$$ LANGUAGE sql STABLE SECURITY DEFINER;
+-- auth_org_role() and auth_has_role() are created AFTER the memberships table
+-- (see below, after table 3)
 
 -- ============================================================================
 -- 1. ORGANIZATIONS
@@ -129,6 +108,27 @@ CREATE UNIQUE INDEX idx_memberships_unique ON memberships(user_id, organization_
     WHERE status != 'suspended';
 CREATE INDEX idx_memberships_org ON memberships(organization_id, role, status);
 CREATE INDEX idx_memberships_user ON memberships(user_id, status);
+
+-- ============================================================================
+-- HELPER: role functions (created here because they depend on memberships table)
+-- ============================================================================
+CREATE OR REPLACE FUNCTION auth_org_role() RETURNS TEXT AS $$
+    SELECT role FROM public.memberships
+    WHERE user_id = auth.uid()
+      AND organization_id = auth_org_id()
+      AND status = 'active'
+    LIMIT 1;
+$$ LANGUAGE sql STABLE SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION auth_has_role(allowed_roles TEXT[]) RETURNS BOOLEAN AS $$
+    SELECT EXISTS (
+        SELECT 1 FROM public.memberships
+        WHERE user_id = auth.uid()
+          AND organization_id = auth_org_id()
+          AND status = 'active'
+          AND role = ANY(allowed_roles)
+    );
+$$ LANGUAGE sql STABLE SECURITY DEFINER;
 
 -- ============================================================================
 -- 4. PROPERTIES
