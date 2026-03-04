@@ -10,6 +10,7 @@ import {
   checkHumanReview,
   checkRateLimit,
 } from "../_shared/guardrails.ts";
+import { notifyByRole } from "../_shared/notifications.ts";
 
 /**
  * AI Maintenance Triage
@@ -190,7 +191,19 @@ ${vendors?.map((v) =>
       cost_usd: cost,
     });
 
-    // If human review needed, create a notification for the property manager
+    // Always notify property managers of new maintenance requests
+    await notifyByRole(supabase, {
+      organization_id: request.organization_id,
+      roles: ["owner", "property_manager"],
+      title: `New maintenance request: ${request.title}`,
+      body: parsed
+        ? `Category: ${parsed.suggested_category}, Priority: ${parsed.priority_score}/10. Est: $${parsed.estimated_cost_low}-$${parsed.estimated_cost_high}.`
+        : `New request submitted. AI triage pending.`,
+      entity_type: "maintenance_request",
+      entity_id: maintenance_request_id,
+    });
+
+    // If human review needed, send an additional urgent notification
     if (review.needsReview) {
       const { data: property } = await supabase
         .from("properties")
