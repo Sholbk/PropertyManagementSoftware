@@ -175,3 +175,78 @@ export async function getUnitTransactions(supabase: Client, unitId: string) {
     .order("transaction_date", { ascending: false })
     .limit(24);
 }
+
+// ============================================================================
+// Revenue Feature Queries
+// ============================================================================
+
+export async function getAiUsageQuota(supabase: Client, orgId: string) {
+  const today = new Date().toISOString().slice(0, 10);
+  return supabase
+    .from("ai_usage_quotas")
+    .select("*")
+    .eq("organization_id", orgId)
+    .lte("period_start", today)
+    .gte("period_end", today)
+    .maybeSingle();
+}
+
+export async function getMaintenanceMarkups(supabase: Client, orgId: string, limit = 50) {
+  return supabase
+    .from("maintenance_markups")
+    .select("id, vendor_cost, owner_charge, markup_amount, markup_pct, notes, invoice_number, billed_to, created_at, work_order_id")
+    .eq("organization_id", orgId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+}
+
+export async function getVendorMarketplaceProfiles(supabase: Client, state?: string, specialty?: string) {
+  let query = supabase
+    .from("vendor_marketplace_profiles")
+    .select("id, company_name, contact_name, state, city, specialties, hourly_rate_min, hourly_rate_max, rating_avg, rating_count, is_verified, listing_tier, description")
+    .eq("is_active", true)
+    .order("listing_tier", { ascending: false })
+    .order("rating_avg", { ascending: false })
+    .limit(50);
+  if (state) query = query.eq("state", state);
+  if (specialty) query = query.contains("specialties", [specialty]);
+  return query;
+}
+
+export async function getVendorReviews(supabase: Client, profileId: string) {
+  return supabase
+    .from("vendor_reviews")
+    .select("id, rating, review_text, response_text, created_at")
+    .eq("vendor_marketplace_profile_id", profileId)
+    .eq("is_public", true)
+    .order("created_at", { ascending: false })
+    .limit(20);
+}
+
+export async function getOwnerReportConfigs(supabase: Client, orgId: string) {
+  return supabase
+    .from("owner_report_configs")
+    .select("id, property_id, report_type, recipients, is_active, last_sent_at, next_send_date, properties(name)")
+    .eq("organization_id", orgId)
+    .order("created_at", { ascending: false });
+}
+
+export async function getOwnerReports(supabase: Client, orgId: string, limit = 20) {
+  return supabase
+    .from("owner_reports")
+    .select("id, period_type, period_date, report_url, sent_at, properties(name)")
+    .eq("organization_id", orgId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+}
+
+export async function getBenchmarkData(supabase: Client, propertyTypes: string[], states: string[]) {
+  return supabase
+    .from("benchmark_data")
+    .select("*")
+    .in("property_type", propertyTypes)
+    .in("state", states)
+    .eq("period_type", "monthly")
+    .order("period_date", { ascending: false })
+    .limit(20);
+}

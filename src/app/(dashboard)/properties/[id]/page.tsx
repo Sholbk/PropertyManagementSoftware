@@ -56,9 +56,15 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         { label: property.name },
       ]} />
 
-      <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-bold text-gray-900">{property.name}</h1>
-        <Badge variant="info">{formatPropertyType(property.property_type)}</Badge>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-gray-900">{property.name}</h1>
+          <Badge variant="info">{formatPropertyType(property.property_type)}</Badge>
+        </div>
+        <div className="flex gap-2">
+          <Link href={`/properties/${id}/timeline`} className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50">Timeline</Link>
+          <Link href={`/properties/${id}/edit`} className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50">Edit</Link>
+        </div>
       </div>
       <p className="text-sm text-gray-500">
         {property.address_line1}, {property.city}, {property.state} {property.zip}
@@ -69,13 +75,16 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
       {/* Unit Occupancy */}
       <Card>
-        <h3 className="mb-3 text-sm font-semibold text-gray-900">Units ({units.length})</h3>
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-gray-900">Units ({units.length})</h3>
+          <Link href={`/properties/${id}/units/new`} className="text-sm text-blue-600 hover:underline">Add Unit</Link>
+        </div>
         <VacancyBar occupied={occupied} vacant={vacant} total={units.length} className="mb-4" />
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {units.map((unit) => (
             <Link
               key={unit.id}
-              href={`/units/${unit.id}`}
+              href={`/units/${unit.id}/edit`}
               className="flex flex-col items-center rounded-md border border-gray-200 p-3 text-center transition-colors hover:bg-gray-50"
             >
               <span className="text-sm font-medium">{unit.unit_number}</span>

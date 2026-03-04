@@ -1,0 +1,8 @@
+# Default owner for all files
+* @Sholbk
+
+# Supabase migrations require careful review
+supabase/migrations/ @Sholbk
+
+# GitHub Actions workflows
+.github/ @Sholbk

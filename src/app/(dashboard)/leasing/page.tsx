@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatCurrency, daysUntil } from "@/lib/utils";
+import Link from "next/link";
 
 export const metadata = { title: "Leasing | PMPP" };
 
@@ -21,8 +22,11 @@ export default async function LeasingPage() {
   if (!leases || leases.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-gray-900">Leasing</h1>
-        <EmptyState title="No active leases" description="Active leases will appear here." />
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">Leasing</h1>
+          <Link href="/leasing/new" className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">New Lease</Link>
+        </div>
+        <EmptyState title="No active leases" description="Create a lease to start tracking occupancy." action={<Link href="/leasing/new" className="text-blue-600 hover:underline">Create your first lease</Link>} />
       </div>
     );
   }
@@ -36,7 +40,10 @@ export default async function LeasingPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Leasing</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Leasing</h1>
+        <Link href="/leasing/new" className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">New Lease</Link>
+      </div>
 
       {/* Expiring Soon Alert */}
       {expiring.length > 0 && (

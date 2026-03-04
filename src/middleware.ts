@@ -34,6 +34,7 @@ export async function middleware(request: NextRequest) {
   const isPublicRoute =
     request.nextUrl.pathname === "/" ||
     request.nextUrl.pathname.startsWith("/login") ||
+    request.nextUrl.pathname.startsWith("/signup") ||
     request.nextUrl.pathname.startsWith("/auth");
 
   if (!user && !isPublicRoute) {
@@ -48,6 +49,9 @@ export async function middleware(request: NextRequest) {
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
+
+  // Feature gating for premium routes is handled at the page level
+  // (each page checks plan access and redirects to /settings/billing)
 
   return supabaseResponse;
 }

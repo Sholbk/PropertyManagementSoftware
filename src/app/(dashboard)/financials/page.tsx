@@ -6,6 +6,7 @@ import { MetricCard } from "@/components/dashboard/metric-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TrendSpark } from "@/components/dashboard/trend-spark";
 import { formatCurrency } from "@/lib/utils";
+import Link from "next/link";
 
 export const metadata = { title: "Financials | PMPP" };
 
@@ -24,7 +25,12 @@ export default async function FinancialsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Financials</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Financials</h1>
+        <Link href="/financials/transactions" className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+          View Transactions
+        </Link>
+      </div>
 
       {/* Financial KPIs */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

@@ -159,6 +159,7 @@ export function checkHumanReview(
 
 /**
  * Check if an org has exceeded its AI call budget.
+ * Reads tier-aware limits from org's plan_limits if no overrides provided.
  * Returns true if the call should proceed.
  */
 export async function checkRateLimit(
@@ -166,8 +167,21 @@ export async function checkRateLimit(
   orgId: string,
   limits: { maxCallsPerHour?: number; maxCallsPerDay?: number } = {}
 ): Promise<{ allowed: boolean; reason?: string }> {
-  const maxPerHour = limits.maxCallsPerHour ?? 100;
-  const maxPerDay = limits.maxCallsPerDay ?? 1000;
+  // If no explicit limits, look up the org's plan-based limits
+  let maxPerHour = limits.maxCallsPerHour;
+  let maxPerDay = limits.maxCallsPerDay;
+
+  if (maxPerHour === undefined || maxPerDay === undefined) {
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("plan_limits")
+      .eq("id", orgId)
+      .single();
+
+    const planLimits = org?.plan_limits as Record<string, number> | null;
+    maxPerHour = maxPerHour ?? planLimits?.ai_calls_per_hour ?? 100;
+    maxPerDay = maxPerDay ?? planLimits?.ai_calls_per_day ?? 1000;
+  }
 
   // Count calls in last hour
   const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -193,6 +207,10 @@ export async function checkRateLimit(
   if ((dayCount ?? 0) >= maxPerDay) {
     return { allowed: false, reason: `Daily limit exceeded (${maxPerDay}/day)` };
   }
+
+  // Increment AI usage quota for the current billing period
+  const today = new Date().toISOString().slice(0, 10);
+  await supabase.rpc("increment_ai_usage", { p_org_id: orgId, p_date: today }).maybeSingle();
 
   return { allowed: true };
 }

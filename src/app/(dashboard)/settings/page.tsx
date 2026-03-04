@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import Link from "next/link";
 
 export const metadata = { title: "Settings | PMPP" };
 
@@ -65,11 +66,30 @@ export default async function SettingsPage() {
         )}
       </Card>
 
+      {/* Billing Link */}
+      <Card>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">Billing & Plans</h3>
+            <p className="mt-1 text-sm text-gray-500">Manage your subscription, add-ons, and payment method.</p>
+          </div>
+          <Link
+            href="/settings/billing"
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Manage Billing
+          </Link>
+        </div>
+      </Card>
+
       {/* Team Members */}
       <Card>
-        <h3 className="mb-3 text-sm font-semibold text-gray-900">
-          Team Members ({members?.length ?? 0})
-        </h3>
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-gray-900">
+            Team Members ({members?.length ?? 0})
+          </h3>
+          <Link href="/settings/team/invite" className="text-sm text-blue-600 hover:underline">Invite Member</Link>
+        </div>
         {members && members.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">

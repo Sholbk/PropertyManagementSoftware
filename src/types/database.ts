@@ -132,6 +132,11 @@ export interface Organization {
   settings: Record<string, unknown>;
   subscription_status: string;
   trial_ends_at: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  plan_limits: Record<string, unknown>;
+  billing_email: string | null;
+  add_ons: string[];
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -301,6 +306,7 @@ export interface Vendor {
   license_number: string | null;
   w9_on_file: boolean;
   is_preferred: boolean;
+  marketplace_profile_id: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -462,6 +468,170 @@ export interface Notification {
   is_read: boolean;
   read_at: string | null;
   created_at: string;
+}
+
+// ============================================================================
+// Revenue Feature Types
+// ============================================================================
+
+export interface SubscriptionEvent {
+  id: string;
+  organization_id: string;
+  stripe_event_id: string;
+  event_type: string;
+  payload: Record<string, unknown>;
+  processed_at: string | null;
+  error: string | null;
+  created_at: string;
+}
+
+export interface AiUsageQuota {
+  id: string;
+  organization_id: string;
+  period_start: string;
+  period_end: string;
+  calls_used: number;
+  calls_limit: number;
+  tokens_used: number;
+  tokens_limit: number | null;
+  cost_usd_used: number;
+  cost_usd_limit: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MaintenanceMarkup {
+  id: string;
+  organization_id: string;
+  work_order_id: string;
+  vendor_cost: number;
+  owner_charge: number;
+  markup_amount: number;
+  markup_pct: number;
+  notes: string | null;
+  invoice_number: string | null;
+  billed_to: "owner" | "tenant" | "property" | null;
+  transaction_id: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VendorMarketplaceProfile {
+  id: string;
+  user_id: string;
+  company_name: string;
+  contact_name: string | null;
+  email: string;
+  phone: string | null;
+  website: string | null;
+  description: string | null;
+  logo_url: string | null;
+  address: string | null;
+  city: string | null;
+  state: string;
+  zip: string | null;
+  service_area_miles: number;
+  specialties: string[];
+  hourly_rate_min: number | null;
+  hourly_rate_max: number | null;
+  license_number: string | null;
+  insurance_verified: boolean;
+  insurance_expiry: string | null;
+  years_in_business: number | null;
+  is_verified: boolean;
+  is_active: boolean;
+  listing_tier: "free" | "featured" | "premium";
+  stripe_account_id: string | null;
+  rating_avg: number;
+  rating_count: number;
+  profile_views: number;
+  lead_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VendorReview {
+  id: string;
+  vendor_marketplace_profile_id: string;
+  organization_id: string;
+  work_order_id: string | null;
+  reviewer_id: string;
+  rating: number;
+  review_text: string | null;
+  response_text: string | null;
+  response_at: string | null;
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VendorLead {
+  id: string;
+  vendor_marketplace_profile_id: string;
+  organization_id: string;
+  requested_by: string;
+  message: string | null;
+  status: "pending" | "accepted" | "declined" | "expired";
+  specialty_needed: string | null;
+  responded_at: string | null;
+  created_at: string;
+}
+
+export interface OwnerReportConfig {
+  id: string;
+  organization_id: string;
+  property_id: string | null;
+  report_type: "monthly" | "quarterly" | "annual";
+  recipients: string[];
+  include_sections: string[];
+  include_benchmarks: boolean;
+  is_active: boolean;
+  last_sent_at: string | null;
+  next_send_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OwnerReport {
+  id: string;
+  organization_id: string;
+  config_id: string;
+  property_id: string | null;
+  period_type: string;
+  period_date: string;
+  report_url: string;
+  sent_to: string[];
+  sent_at: string | null;
+  created_at: string;
+}
+
+export interface BenchmarkData {
+  id: string;
+  period_type: "monthly" | "quarterly";
+  period_date: string;
+  property_type: string;
+  state: string;
+  unit_count_bucket: string;
+  sample_size: number;
+  avg_vacancy_rate: number | null;
+  median_vacancy_rate: number | null;
+  avg_occupancy_rate: number | null;
+  avg_rent_per_unit: number | null;
+  median_rent_per_unit: number | null;
+  avg_expense_ratio: number | null;
+  avg_noi_per_unit: number | null;
+  avg_rent_collection_rate: number | null;
+  avg_maintenance_cost_per_unit: number | null;
+  avg_completion_hours: number | null;
+  avg_tenant_retention: number | null;
+  avg_days_to_lease: number | null;
+  avg_rent_growth_pct: number | null;
+  p25_rent_per_unit: number | null;
+  p75_rent_per_unit: number | null;
+  p25_vacancy_rate: number | null;
+  p75_vacancy_rate: number | null;
+  computed_at: string;
 }
 
 export interface Inspection {

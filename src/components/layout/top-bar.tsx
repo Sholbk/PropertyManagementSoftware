@@ -1,4 +1,5 @@
 import { NotificationBell } from "./notification-bell";
+import { GlobalSearch } from "./global-search";
 
 interface TopBarProps {
   userEmail: string;
@@ -12,6 +13,7 @@ export function TopBar({ userEmail, orgName }: TopBarProps) {
         {orgName && <span className="text-sm font-medium text-gray-700">{orgName}</span>}
       </div>
       <div className="flex items-center gap-4">
+        <GlobalSearch />
         <NotificationBell />
         <span className="text-sm text-gray-500">{userEmail}</span>
       </div>

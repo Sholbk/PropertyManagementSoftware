@@ -38,15 +38,21 @@ export default async function PropertiesPage() {
   if (!properties || properties.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-gray-900">Properties</h1>
-        <EmptyState title="No properties yet" description="Add your first property to get started." />
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">Properties</h1>
+          <Link href="/properties/new" className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Add Property</Link>
+        </div>
+        <EmptyState title="No properties yet" description="Add your first property to get started." action={<Link href="/properties/new" className="text-blue-600 hover:underline">Add your first property</Link>} />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Properties</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Properties</h1>
+        <Link href="/properties/new" className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Add Property</Link>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {properties.map((property) => {

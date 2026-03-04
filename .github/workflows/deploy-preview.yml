@@ -1,4 +1,4 @@
-name: PR Preview
+name: Deploy Preview
 
 on:
   pull_request:
@@ -18,11 +18,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Type check
-        run: npx tsc --noEmit
-
-      - name: Build
+      - name: Build (against staging env)
         run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
+
+      # Netlify auto-deploys preview from PR via GitHub integration.
+      # This job validates the build succeeds before the preview goes live.
 
       - name: Comment build status
         if: always()

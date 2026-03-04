@@ -33,6 +33,8 @@ yarn-error.log*
 # env files
 .env*
 !.env.local.example
+!.env.staging.example
+!.env.production.example
 
 # netlify
 .netlify
