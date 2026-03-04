@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { Sidebar } from "@/components/layout/sidebar";
+import { TopBar } from "@/components/layout/top-bar";
 
 export default async function DashboardLayout({
   children,
@@ -15,15 +17,25 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
+  // Fetch org name
+  const orgId = user.app_metadata?.active_org_id;
+  let orgName: string | undefined;
+  if (orgId) {
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("name")
+      .eq("id", orgId)
+      .single();
+    orgName = org?.name;
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">PMPP</h1>
-          <span className="text-sm text-gray-500">{user.email}</span>
-        </div>
-      </nav>
-      <main className="p-6">{children}</main>
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar />
+      <div className="flex flex-1 flex-col">
+        <TopBar userEmail={user.email ?? ""} orgName={orgName} />
+        <main className="flex-1 p-4 lg:p-6">{children}</main>
+      </div>
     </div>
   );
 }
